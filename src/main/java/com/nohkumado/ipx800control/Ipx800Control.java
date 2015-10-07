@@ -21,6 +21,7 @@
 package com.nohkumado.ipx800control;
 import java.io.*;
 import java.net.*;
+import java.security.spec.*;
 /**
  classe qui comprend un interfacage entre tous les accˋes TCP/I m2m vers un objet java
 
@@ -33,21 +34,38 @@ public class Ipx800Control
 	protected String server = "domus.bboett.lan";
 	protected String returnMsg = "";
 
+	public void setHost(String p0)
+	{
+		server = p0;
+	}
+	public void setPort(int p0)
+	{
+		port = p0;
+	}
+
 	protected boolean sendCmd(String cmd)
 	{
 		Socket socket = null;
         PrintWriter out = null;
         BufferedReader in = null;
-
+		//System.out.println("sendcmd for "+cmd);
         try
 		{
+			//System.out.println("opening "+server+":"+port);
             socket = new Socket(server, port);
             out = new PrintWriter(socket.getOutputStream(), true);
             in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+			//System.out.println("about to send out cmd");
 			out.println(cmd);
+			//System.out.println("waiting for return");
 			returnMsg = in.readLine();
-			System.out.println(in.readLine());
-
+			//System.out.println("return from ipx:"+returnMsg);
+			if (returnMsg.matches("="))
+			{
+				String[] parts = returnMsg.split("=");
+				//String part1 = parts[0]; // Getin
+				returnMsg = parts[1]; // value
+			}
 			out.close();
 			in.close();
 			socket.close();
@@ -131,10 +149,7 @@ public class Ipx800Control
 
 		if (sendCmd(cmd))
 		{
-			String[] parts = returnMsg.split("=");
-			//String part1 = parts[0]; // Getin
-			String part2 = parts[1]; // value
-			if (part2.equals("1")) retVal = true;
+			if (returnMsg.equals("1")) retVal = true;
 		}
 
 		return retVal;
@@ -150,30 +165,26 @@ public class Ipx800Control
 	 */
 	public boolean[] getIn()
 	{
+		System.out.println("getIn");
 		String cmd = "GetInputs";
 
 		boolean[] retVal = new boolean[32];
-
+		//System.out.println("getIn ckmmand to send "+cmd);
 		if (sendCmd(cmd))
 		{
-			String[] parts = returnMsg.split("=");
-			//String part1 = parts[0]; // Getin
-			String part2 = parts[1]; // value
+			System.out.println("got return " + returnMsg);
+
 			for (int i =0; i < 32;i++)
 			{
-				if (part2.charAt(i) == '1') retVal[i] = true;
+				if (returnMsg.charAt(i) == '1') retVal[i] = true;
 				else retVal[i] = false;
 			}
-
 		}
 		else
 		{
-			for (int i =0; i < 32;i++)
-			{
-				retVal[i] = false;
-			}
+			for (int i =0; i < 32;i++) retVal[i] = false;
 		}
-
+		System.out.println("about to exit");
 		return retVal;
 	}
 	/*
@@ -195,16 +206,13 @@ public class Ipx800Control
 
 		if (sendCmd(cmd))
 		{
-			String[] parts = returnMsg.split("=");
-			//String part1 = parts[0]; // Getin
-			String part2 = parts[1]; // value
 			try
 			{
-				retVal = Integer.parseInt(part2);
+				retVal = Integer.parseInt(returnMsg);
 			}
 			catch (NumberFormatException e)
 			{
-				System.err.println("no number: " + part2);
+				System.err.println("no number: " + returnMsg);
 			}
 		}
 
@@ -216,30 +224,42 @@ public class Ipx800Control
 	 @param le numéro de compteur (de 1 à 3)
 	 @return entier 32 Bits soit une valeur de 0 à 4294967295
 	 */
-	public int getCount(int relai)
+	public int getCount(int counterId)
 	{
-		if (relai < 1 || relai > 3) return -1;
-		
-		String cmd = "GetCount" + relai;
+		if (counterId < 1 || counterId > 3) return -1;
+
+		String cmd = "GetCount" + counterId;
 
 		int retVal = -1;
 
 		if (sendCmd(cmd))
 		{
-			String[] parts = returnMsg.split("=");
-			//String part1 = parts[0]; // Getin
-			String part2 = parts[1]; // value
 			try
 			{
-				retVal = Integer.parseInt(part2);
+				retVal = Integer.parseInt(returnMsg);
 			}
 			catch (NumberFormatException e)
 			{
-				System.err.println("no number: " + part2);
+				System.err.println("no number: " + returnMsg);
 			}
 		}
 		return retVal;
 	}
+	/*
+	 Obtenir l‘état des compteurs d’implusion :  
+	 @return vecteur d'entiers 32 Bits (soit 3x des valeurs de 0 à 4294967295)
+	 */
+	public int[] getCount()
+	{
+		int [] result = new int[3];
+		for (int counterId = 1 ; counterId < 4; counterId++)
+		{
+			result[counterId-1] = getCount(counterId);			
+		}
+
+		return result;
+	}
+
 	/*
 	 Obtenir l‘état d’une sortie:  
 	 GetOut Paramètres : GetOutx ou x est le numéro de la sortie (de 1 à 32). 
@@ -257,10 +277,7 @@ public class Ipx800Control
 
 		if (sendCmd(cmd))
 		{
-			String[] parts = returnMsg.split("=");
-			//String part1 = parts[0]; // Getin
-			String part2 = parts[1]; // value
-			if (part2.equals("1")) retVal = true;
+			if (returnMsg.equals("1")) retVal = true;
 		}
 
 		return retVal;
@@ -280,22 +297,15 @@ public class Ipx800Control
 
 		if (sendCmd(cmd))
 		{
-			String[] parts = returnMsg.split("=");
-			//String part1 = parts[0]; // Getin
-			String part2 = parts[1]; // value
 			for (int i =0; i < 32;i++)
 			{
-				if (part2.charAt(i) == '1') retVal[i] = true;
+				if (returnMsg.charAt(i) == '1') retVal[i] = true;
 				else retVal[i] = false;
 			}
-
 		}
 		else
 		{
-			for (int i =0; i < 32;i++)
-			{
-				retVal[i] = false;
-			}
+			for (int i =0; i < 32;i++) retVal[i] = false;
 		}
 
 		return retVal;
@@ -328,8 +338,62 @@ public class Ipx800Control
 		String cmd = "Reset";
 		sendCmd(cmd);
 	}
-	
+
 	/*
-	 Simuler une entrée  :  http://IPX800_V3/leds.cgi? Paramètres  : led=x où  x  est  le  numéro  de  l'entrée,  de  100  à  131. On  pourra  donc,  de  la  sorte,  commander  les  entrées  9  à  32  (108  à  131  dans  la  commande  http)  même  si  les  extensions  X880  ne  sont  pas présentes  physiquement.  Pratique  pour  créer  des  assignations  virtuelles  ! •  Réinitialiser  un  timer  :  http://IPX800_V3/protect/timers/timer1.htm? Paramètres  : erase=x où  x  est  le  numéro  du  timer  à  effacer,  de  0  à  127. •  Programmer un timer  :  http://IPX800_V3/protect/timers/timer1.htm? Paramètres  : timer=x  où  x  c'est  le  numéro  du  timer  concerné,  de  0  à  127 day=x  où  x  est  le  jour  concerné  de  0  à  6  (lundi  à  dimanche),  7  pour  tous  les  jours,  8  pour  les  jours  travaillés  (lundi  à  vendredi)  et  9  pour  les  weekends. time=HH%3AMM  où  HH  représente  les  heures  et  MM  les  minutes  de  l'horaire  choisi relay=x  où  x  est  le  numéro  de  sortie  assignée,  de  0  à  31,  ou  de  compteur  assigné,  de  32  à  34. action=x  où  x  est  le  numéro  d'action  avec  0=off,  1=on,  2=inversion,  3=impulsion,  4=annulation  du  timer  (valeur  vide)  et  7=pour  réinitialiser  les compteurs. •  Commander une sortie  :  http://IPX800_V3/leds.cgi? Paramètre  : led=x avec  x  le  numéro  de  la  sortie,  de  0  à  31. Cette  syntaxe  permet  la  commande  directe  d'une  sortie.  Cette  syntaxe  commandera  une  impulsion  si  la  sortie  concernée  a  été  préréglée  avec  au moins  un  Tb  non  nul  dans  le  site  embarqué  de  l'IPX.  Sinon  la  commande  inversera  tout  simplement  l'état  de  la  sortie,  comme  un  télérupteur. •  Commander une sortie  sans  mode  impulsionnel  :  http://IPX800_V3/preset.htm? Paramètre  : setx=1 ou  0  où  x le  numéro  de  la  sortie  de  1  à  32. Cette  syntaxe  permet  de  commander  un  état  de  sortie,  c'est-à-dire  on  pour  1  ou  off  pour  0.  Nous  avons  donc  là  une  sorte  d'interrupteur.  Avantage de  cette  commande  :  elle  peut  tout  de  même  s'appliquer  à  une  sortie  préréglée  en  mode  impulsionnel.  Par  conséquent,  pour  une  telle  sortie  un "led"  lancera  une  impulsion  alors  qu'un  "set"  forcera  un  état  on  ou  off  sans  impulsion. •  Gérer un compteur  et  sa  valeur  :  http://IPX800_V3/protect/assignio/counter.htm? Paramètres  : counternamex=NOUVEAUNOM permet  de  renommer  le  compteur  x,  de  1  à  3 counterx=123 permet  de  forcer  une  valeur  au  compteur  x Commande  très  pratique  pour  faire  une  remise  à  zéro  par  exemple. •  Gérer la configuration  d'une  sortie  :  http://IPX800_V3/protect/settings/output1.htm? Paramètres  : output=x où  x  est  le  numéro  de  sortie  concernée,  de  1  à  32 
-	*/
+	 Simuler une entrée  :  http://IPX800_V3/leds.cgi? 
+	 Paramètres  : led=x où  x  est  le  numéro  de  l'entrée,  de  100  à  131. 
+	 On  pourra  donc,  de  la  sorte,  commander  les  entrées  9  à  32  
+	 (108  à  131  dans  la  commande  http)  même  si  les  extensions  
+	 X880  ne  sont  pas présentes  physiquement.  
+	 Pratique  pour  créer  des  assignations  virtuelles  ! •  
+
+	 Réinitialiser  un  timer  :  http://IPX800_V3/protect/timers/timer1.htm? 
+	 Paramètres  : erase=x où  x  est  le  numéro  du  timer  à  effacer,  
+	 de  0  à  127. •  
+
+	 Programmer un timer  :  http://IPX800_V3/protect/timers/timer1.htm? 
+	 Paramètres  : timer=x  où  x  c'est  le  numéro  du  timer  concerné,  
+	 de  0  à  127 day=x  où  x  est  le  jour  concerné  de  
+	 0  à  6  (lundi  à  dimanche),  
+	 7  pour  tous  les  jours,  
+	 8  pour  les  jours  travaillés  (lundi  à  vendredi)  et  
+	 9  pour  les  weekends. 
+	 time=HH%3AMM  où  HH  représente  les  heures  et  MM  les  minutes  de  l'horaire 
+	 choisi relay=x  où  x  est  le  numéro  de  sortie  assignée,  de  0  à  31,  
+	 ou  de  compteur  assigné,  de  32  à  34. action=x  
+	 où  x  est  le  numéro  d'action  
+	 avec  0=off,  1=on,  2=inversion,  3=impulsion,  4=annulation  du  timer  
+	 (valeur  vide)  et  7=pour  réinitialiser  les compteurs. •  
+
+	 Commander une sortie  :  http://IPX800_V3/leds.cgi? 
+	 Paramètre  : led=x avec  x  le  numéro  de  la  sortie,  de  0  à  31. 
+	 Cette  syntaxe  permet  la  commande  directe  d'une  sortie.  
+	 Cette  syntaxe  commandera  une  impulsion  si  la  sortie  concernée  a  été  
+	 préréglée  avec  au moins  un  Tb  non  nul  dans  le  site  embarqué  de  
+	 l'IPX.  Sinon  la  commande  inversera  tout  simplement  l'état  de  la  
+	 sortie,  comme  un  télérupteur. 
+
+	 •  Commander une sortie  sans  mode  impulsionnel  :  
+	 http://IPX800_V3/preset.htm? 
+	 Paramètre  : setx=1 ou  0  où  x le  numéro  de  la  sortie  de  1  à  32. 
+	 Cette  syntaxe  permet  de  commander  un  état  de  sortie,  
+	 c'est-à-dire  on  pour  1  ou  off  pour  0.  
+	 Nous  avons  donc  là  une  sorte  d'interrupteur.  
+	 Avantage de  cette  commande  :  elle  peut  tout  de  même  s'appliquer  à
+	 une  sortie  préréglée  en  mode  impulsionnel.  
+	 Par  conséquent,  pour  une  telle  sortie  un "led"  lancera  une  impulsion
+	 alors  qu'un  "set"  forcera  un  état  on  ou  off  sans  impulsion. 
+
+	 •  Gérer un compteur  et  sa  valeur  :  
+	 http://IPX800_V3/protect/assignio/counter.htm? 
+	 Paramètres  : counternamex=NOUVEAUNOM permet  de  renommer  le  
+	 compteur  x,  de  1  à  3 counterx=123 permet  de  forcer  une  valeur  au
+	 compteur  x Commande  très  pratique  pour  faire  une  remise  à  zéro  par
+	 exemple. 
+
+	 •  Gérer la configuration  d'une  sortie  :  
+	 http://IPX800_V3/protect/settings/output1.htm? 
+	 Paramètres  : output=x où  x  est  le  numéro  de  sortie  concernée,  
+	 de  1  à  32 
+	 */
 }
