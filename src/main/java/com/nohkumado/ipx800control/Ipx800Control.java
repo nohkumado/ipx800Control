@@ -34,10 +34,18 @@ public class Ipx800Control
 	protected String server = "domus.bboett.lan";
 	protected String returnMsg = "";
 
+	/**
+	setHost
+	@argument the hostname to use, its a string, since i set up my own bind...
+	*/
 	public void setHost(String p0)
 	{
 		server = p0;
 	}
+	/**
+	setPort
+	@argument the port to use, in case you changed the default setting...
+	*/
 	public void setPort(int p0)
 	{
 		port = p0;
