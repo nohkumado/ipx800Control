@@ -31,7 +31,7 @@ import java.security.spec.*;
 public class Ipx800Control
 {
 	protected int port = 9870;
-	protected String server = "domus.bboett.lan";
+	protected String server = "domus.maison.home";
 	protected String returnMsg = "";
 
 	/**
