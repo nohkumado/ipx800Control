@@ -5,7 +5,7 @@
 
  This file is part of Foobar.
 
- Foobar is free software: you can redistribute it and/or modify
+ IpxControl is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation, either version 3 of the License, or
  (at your option) any later version.
@@ -33,6 +33,7 @@ import org.apache.http.message.*;
  Class that interfaces with the IPX800v3 through TCP/IP - m2m commands.
 
  @author Bruno Boettcher <nokumado@gmail.com>
+  @since 10.2015
 
  */
 public class Ipx800Control
@@ -61,7 +62,7 @@ public class Ipx800Control
    sendCmd
    @param cmd the command to send
    opens a TCP port and sends a m2m command to the ipx, stores the eventual result in 
-   returnMsg
+    return in @see returnMsg
    */
   protected boolean sendCmd(String cmd)
   {
@@ -108,42 +109,52 @@ public class Ipx800Control
    sendHtmlCmd
 
    @param request a HttpGet Object with the GET encoded url and data
+   @return the webpage fetched in a string
    */
-  protected String sendHtmlCmd(HttpGet request)
+  protected String sendHtmlCmd(String url)
   {
-	String html = "";
+    String html = "";
+    HttpGet request = null;
+    try
+    {
+      request = new HttpGet(url);
+    } 
+    catch (java.net.URISyntaxException use)
+    { System.err.println("problem with uri: " + use);}
 
-	try
-	{
-	  HttpClient client = new DefaultHttpClient();
-	  //HttpGet request = new HttpGet(url);
-	  HttpResponse response = client.execute(request);
+    try
+    {
+      HttpClient client = new DefaultHttpClient();
+      //HttpGet request = new HttpGet(url);
+      HttpResponse response = client.execute(request);
 
-	  InputStream in = response.getEntity().getContent();
-	  BufferedReader reader = new BufferedReader(new InputStreamReader(in));
-	  StringBuilder str = new StringBuilder();
-	  String line = null;
-	  while ((line = reader.readLine()) != null)
-	  {
-		str.append(line);
-	  }
-	  in.close();
-	  html = str.toString();
+      InputStream in = response.getEntity().getContent();
+      BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+      StringBuilder str = new StringBuilder();
+      String line = null;
+      while ((line = reader.readLine()) != null)
+      {
+	str.append(line);
+      }
+      in.close();
+      html = str.toString();
+    }
+    catch (IOException e)
+    { System.err.println("problem: " + e);}
+    catch (org.apache.http.HttpException he)
+    { System.err.println("problem: " + he);}
+    /*
+    //TODO should put all time consuming stuff in a thread....
+    Thread thread = new Thread(new Runnable(){
+    @Override
+    public void run()
+    {
+	//code to do the HTTP request
 	}
-	catch (IOException e)
-	{ System.err.println("problem: " + e);}
-	/*
-	//TODO should put all time consuming stuff in a thread....
-	 Thread thread = new Thread(new Runnable(){
-	 @Override
-	 public void run()
-	 {
-	 //code to do the HTTP request
-	 }
-	 });
-	 thread.start();
-	*/
-	return html;	  
+	});
+	thread.start();
+     */
+      return html;	  
   }
   /**
    Setxxy ou  xx  est  le  numéro  de  sortie  de  01  à  32 
@@ -151,10 +162,12 @@ public class Ipx800Control
 
    @example Pour  mettre  le  relais  1  à  1  le  code  commande  est  Set011       
 
+    <p>
    Pour  commander  la  sortie  en  mode  impulsionnel  il  faut  ajouter  le  
    symbole  p  en  fin  de  chaine  et   avoir  été  définit  les  délais  
    Ta  et  Tb  dans  l’interface  WEB  de  l’IPX800. 
    Pour mettre le relais 1 à 1 en mode impulsionnel  le code commande est Set011p  
+    </p>
    @param le no du relai a positionner (1-32)
    @param vrai = actif, faux, ferme
    */
@@ -322,7 +335,7 @@ public class Ipx800Control
    Obtenir l‘état d’une sortie:  
    GetOut Paramètres : GetOutx ou x est le numéro de la sortie (de 1 à 32). 
    @example GetOut1 renvoi la valeur de la sorite 1. 
-   @param le no de la sortie
+   @param relai le no de la sortie
    @return Valeur 0 ou 1 en fonction de l’état de la sortie. 
    */
   public boolean getOut(int relai)
@@ -414,8 +427,7 @@ public class Ipx800Control
 	if (no >= 100 && no < 131)
 	{
 	  url += "?led=" + no;
-	  HttpGet httppost = new HttpGet(url);
-	  sendHtmlCmd(httppost);
+	  sendHtmlCmd(url);
 	}
   }
 
@@ -431,8 +443,7 @@ public class Ipx800Control
 	if (no >= 0 && no < 127)
 	{
 	  url += "erase=" + no;
-	  HttpGet httppost = new HttpGet(url);
-	  sendHtmlCmd(httppost);
+	  sendHtmlCmd(url);
 	}
   }
   /** Programmer un timer  :  http://IPX800_V3/protect/timers/timer1.htm? 
@@ -462,8 +473,7 @@ public class Ipx800Control
 	if (result)
 	{
 	  url += "timer=" + no + "&day=" + day + "&time=" + time + "&relay=" + relai + "&action=" + action;
-	  HttpGet httppost = new HttpGet(url);
-	  sendHtmlCmd(httppost);
+	  sendHtmlCmd(url);
 	}
 	return result;
   }
@@ -483,8 +493,7 @@ public class Ipx800Control
 	if (no >= 0 && no < 32)
 	{
 	  url += "?led=" + no;
-	  HttpGet httppost = new HttpGet(url);
-	  sendHtmlCmd(httppost);
+	  sendHtmlCmd(url);
 	}
   }
   /** •  Commander une sortie  sans  mode  impulsionnel  :  
@@ -507,8 +516,7 @@ public class Ipx800Control
 	{
 	  url += "" + no + "=";
 	  if (state) url += "1"; else url += "0";
-	  HttpGet httppost = new HttpGet(url);
-	  sendHtmlCmd(httppost);
+	  sendHtmlCmd(url);
 	}
   }
 
@@ -531,8 +539,7 @@ public class Ipx800Control
 		if (value >= 0) url += "&"; 
 	  }
 	  if (value >= 0) url += "counter" + no + "=" + value;
-	  HttpGet httppost = new HttpGet(url);
-	  sendHtmlCmd(httppost);
+	  sendHtmlCmd(url);
 	}
   }
   public void setCounterName(int no, String name)
@@ -566,8 +573,7 @@ public class Ipx800Control
 	if (result)
 	{
 	  url += "output=" + no + "&relayname=" + name + "&delayon=" + delayon + "&delayoff=" + delayoff;
-	  HttpGet httppost = new HttpGet(url);
-	  sendHtmlCmd(httppost);
+	  sendHtmlCmd(url);
 	}
 	return result;
   }
@@ -629,8 +635,7 @@ public class Ipx800Control
   public String status()
   {
 	String url = "http://" + server + "/status.xml";
-	  HttpGet httppost = new HttpGet(url);
-	  return sendHtmlCmd(httppost);
+	  return sendHtmlCmd(url);
 	  /*
 	<response>
 	  <led0>0</led0><led1>0</led1><led2>0</led2><led3>0</led3><led4>0</led4><led5>0</led5>
@@ -670,6 +675,22 @@ public class Ipx800Control
 	  <tinfo>---</tinfo>
 	  <version>3.05.59d</version>
 </response>
+
+
+
+
+ [ERROR] /home/bboett/java/ipx800Control/src/main/java/com/nohkumado/ipx800control/Ipx800Control.java:[421,30] unreported exception java.net.URISyntaxException; must be caught or declared to be thrown
+ [ERROR] /home/bboett/java/ipx800Control/src/main/java/com/nohkumado/ipx800control/Ipx800Control.java:[438,30] unreported exception java.net.URISyntaxException; must be caught or declared to be thrown
+ [ERROR] /home/bboett/java/ipx800Control/src/main/java/com/nohkumado/ipx800control/Ipx800Control.java:[469,30] unreported exception java.net.URISyntaxException; must be caught or declared to be thrown
+ [ERROR] /home/bboett/java/ipx800Control/src/main/java/com/nohkumado/ipx800control/Ipx800Control.java:[490,30] unreported exception java.net.URISyntaxException; must be caught or declared to be thrown
+ [ERROR] /home/bboett/java/ipx800Control/src/main/java/com/nohkumado/ipx800control/Ipx800Control.java:[514,30] unreported exception java.net.URISyntaxException; must be caught or declared to be thrown
+ [ERROR] /home/bboett/java/ipx800Control/src/main/java/com/nohkumado/ipx800control/Ipx800Control.java:[538,30] unreported exception java.net.URISyntaxException; must be caught or declared to be thrown
+ [ERROR] /home/bboett/java/ipx800Control/src/main/java/com/nohkumado/ipx800control/Ipx800Control.java:[573,30] unreported exception java.net.URISyntaxException; must be caught or declared to be thrown
+ [ERROR] /home/bboett/java/ipx800Control/src/main/java/com/nohkumado/ipx800control/Ipx800Control.java:[636,30] unreported exception java.net.URISyntaxException; must be caught or declared to be thrown
+
+
+
+
 	  */
   }
   
