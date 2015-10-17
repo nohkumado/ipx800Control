@@ -1,0 +1,9 @@
+git commit
+git push
+mvn -Prelease clean install
+mvn release:prepare
+#in case a tag went wrong...
+git tag -d ipx800control-0.1.1
+git push origin :refs/tags/ipx800control-0.1.1
+mvn release:prepare
+mvn release:perform
