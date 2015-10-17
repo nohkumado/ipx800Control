@@ -109,9 +109,16 @@ public class Ipx800Control
 
    @param request a HttpGet Object with the GET encoded url and data
    */
-  protected String sendHtmlCmd(HttpGet request)
+  protected String sendHtmlCmd(String url)
   {
 	String html = "";
+        HttpGet request = null;
+        try
+        {
+          request = new HttpGet(url);
+        }·
+        catch (java.net.URISyntaxException use)
+        { System.err.println("problem with uri: " + use);}
 
 	try
 	{
@@ -132,7 +139,9 @@ public class Ipx800Control
 	}
 	catch (IOException e)
 	{ System.err.println("problem: " + e);}
-	/*
+	catch (org.apache.http.HttpException he)
+        { System.err.println("problem: " + he);}
+       /*
 	//TODO should put all time consuming stuff in a thread....
 	 Thread thread = new Thread(new Runnable(){
 	 @Override
@@ -414,8 +423,7 @@ public class Ipx800Control
 	if (no >= 100 && no < 131)
 	{
 	  url += "?led=" + no;
-	  HttpGet httppost = new HttpGet(url);
-	  sendHtmlCmd(httppost);
+	  sendHtmlCmd(url);
 	}
   }
 
@@ -431,8 +439,7 @@ public class Ipx800Control
 	if (no >= 0 && no < 127)
 	{
 	  url += "erase=" + no;
-	  HttpGet httppost = new HttpGet(url);
-	  sendHtmlCmd(httppost);
+	  sendHtmlCmd(url);
 	}
   }
   /** Programmer un timer  :  http://IPX800_V3/protect/timers/timer1.htm? 
@@ -462,8 +469,7 @@ public class Ipx800Control
 	if (result)
 	{
 	  url += "timer=" + no + "&day=" + day + "&time=" + time + "&relay=" + relai + "&action=" + action;
-	  HttpGet httppost = new HttpGet(url);
-	  sendHtmlCmd(httppost);
+	  sendHtmlCmd(url);
 	}
 	return result;
   }
@@ -483,8 +489,7 @@ public class Ipx800Control
 	if (no >= 0 && no < 32)
 	{
 	  url += "?led=" + no;
-	  HttpGet httppost = new HttpGet(url);
-	  sendHtmlCmd(httppost);
+	  sendHtmlCmd(url);
 	}
   }
   /** •  Commander une sortie  sans  mode  impulsionnel  :  
@@ -507,8 +512,7 @@ public class Ipx800Control
 	{
 	  url += "" + no + "=";
 	  if (state) url += "1"; else url += "0";
-	  HttpGet httppost = new HttpGet(url);
-	  sendHtmlCmd(httppost);
+	  sendHtmlCmd(url);
 	}
   }
 
@@ -531,8 +535,7 @@ public class Ipx800Control
 		if (value >= 0) url += "&"; 
 	  }
 	  if (value >= 0) url += "counter" + no + "=" + value;
-	  HttpGet httppost = new HttpGet(url);
-	  sendHtmlCmd(httppost);
+	  sendHtmlCmd(url);
 	}
   }
   public void setCounterName(int no, String name)
@@ -566,8 +569,7 @@ public class Ipx800Control
 	if (result)
 	{
 	  url += "output=" + no + "&relayname=" + name + "&delayon=" + delayon + "&delayoff=" + delayoff;
-	  HttpGet httppost = new HttpGet(url);
-	  sendHtmlCmd(httppost);
+	  sendHtmlCmd(url);
 	}
 	return result;
   }
@@ -629,8 +631,7 @@ public class Ipx800Control
   public String status()
   {
 	String url = "http://" + server + "/status.xml";
-	  HttpGet httppost = new HttpGet(url);
-	  return sendHtmlCmd(httppost);
+	  return sendHtmlCmd(url);
 	  /*
 	<response>
 	  <led0>0</led0><led1>0</led1><led2>0</led2><led3>0</led3><led4>0</led4><led5>0</led5>
