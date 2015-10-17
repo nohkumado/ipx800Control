@@ -1,0 +1,1 @@
+curl -T target/ipx800control-0.0.4-SNAPSHOT.jar -unokumado:104e945de809b52cf071bf80a26249a33fc1291b https://api.bintray.com/content/nokumado/maven/ipx800Control/0.1.0-SNAPSHOT/ipx800control-0.0.4-20151017.132212-3.jar
