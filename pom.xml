@@ -3,7 +3,7 @@
   <groupId>nohkumado</groupId>
   <artifactId>ipx800control</artifactId>
   <packaging>jar</packaging>
-  <version>0.1.1</version>
+  <version>0.1.2</version>
   <name>IPX 800 support library</name>
   <url>https://github.com/nohkumado/ipx800Control</url>
   <inceptionYear>2015</inceptionYear>
@@ -64,7 +64,7 @@
      <connection>scm:git:git@github.com:nohkumado/ipx800Control.git</connection>
      <url>scm:git:git@github.com:nohkumado/ipx800Control.git</url>
      <developerConnection>scm:git:git@github.com:nohkumado/ipx800Control.git</developerConnection>
-    <tag>ipx800control-0.1.1</tag>
+    <tag>ipx800control-0.1.2</tag>
   </scm>
 
 
