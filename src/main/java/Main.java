@@ -23,7 +23,9 @@ public class Main
 		{System.out.println("couldn't wait for 5 s.." + e);}
 		System.out.println("setting relai 3 to off ");
 		ipx.set(3, false);
-		System.out.println("done");
+	  System.out.println("asking for status");
+	  System.out.println("result:"+ipx.status());
+	  System.out.println("done");
 		/*System.out.println("entering questioning");
 
 		 Scanner input = new Scanner(System.in);
