@@ -59,6 +59,22 @@ public class Ipx800Control
 	port = p0;
   }
   /**
+   getHost
+   @return the hostname
+   */
+  public String getHost()
+  {
+	return server;
+  }
+  /**
+   setPort
+   @param p0 the port to use, in case you changed the default setting...
+   */
+  public int getPort()
+  {
+	return port;
+  }
+  /**
    sendCmd
    @param cmd the command to send
    opens a TCP port and sends a m2m command to the ipx, stores the eventual result in 
@@ -119,7 +135,8 @@ public class Ipx800Control
     {
       request = new HttpGet(url);
     } 
-    catch (java.net.URISyntaxException use)
+   // catch (java.net.URISyntaxException use)
+    catch (Exception use)
     { System.err.println("problem with uri: " + use);}
 
     try
@@ -139,10 +156,11 @@ public class Ipx800Control
       in.close();
       html = str.toString();
     }
-    catch (IOException e)
+//    catch (IOException e)
+    catch (Exception e)
     { System.err.println("problem: " + e);}
-    catch (org.apache.http.HttpException he)
-    { System.err.println("problem: " + he);}
+    //catch (org.apache.http.HttpException he)
+    //{ System.err.println("problem: " + he);}
     /*
     //TODO should put all time consuming stuff in a thread....
     Thread thread = new Thread(new Runnable(){
