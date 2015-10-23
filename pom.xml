@@ -3,7 +3,7 @@
   <groupId>nohkumado</groupId>
   <artifactId>ipx800control</artifactId>
   <packaging>jar</packaging>
-  <version>0.1.3-SNAPSHOT</version>
+  <version>0.1.4</version>
   <name>IPX 800 support library</name>
   <url>https://github.com/nohkumado/ipx800Control</url>
   <inceptionYear>2015</inceptionYear>
@@ -52,11 +52,13 @@
   <distributionManagement>
     <repository>
       <id>ipx800Control</id>
-      <url>https://api.bintray.com/content/nokumado/maven/ipx800Control;publish=1</url>
+      <url>https://api.bintray.com/nokumado/maven/ipx800Control;publish=1</url>
+      <!--url>https://api.bintray.com/content/nokumado/maven/ipx800Control;publish=1</url-->
     </repository>
     <snapshotRepository>
          <id>ipx800Control</id>
-         <url>https://api.bintray.com/content/nokumado/maven/ipx800Control;publish=1</url>
+         <url>https://api.bintray.com/nokumado/maven/ipx800Control;publish=1</url>
+         <!--url>https://api.bintray.com/content/nokumado/maven/ipx800Control;publish=1</url-->
          <!--url>https://api.bintray.com/content/nokumado/maven/ipx800Control/snapshots;publish=1</url-->
 	 </snapshotRepository>
   </distributionManagement>
